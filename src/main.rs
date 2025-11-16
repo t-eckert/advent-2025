@@ -90,7 +90,7 @@ fn pull(day: u8) -> Result<(), anyhow::Error> {
         .send()?
         .error_for_status()?;
 
-    fs::write(format!("./inputs/day_{}.txt", day), response.bytes()?)
+    fs::write(format!("./inputs/day_{:02}.txt", day), response.bytes()?)
         .map_err(|e| anyhow!(e.to_string()))
 }
 
