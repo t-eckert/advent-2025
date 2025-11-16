@@ -1,12 +1,14 @@
 use crate::{puzzle::Parts, timer::format_duration};
-use std::time::Instant;
+use std::{fs::read_to_string, time::Instant};
 
 const NAME: &str = "Day 1";
+const INPUT_FILE: &str = "inputs/day_01.txt";
 
 pub fn run(parts: Parts) {
     log::debug!("{}", NAME);
 
-    let input = String::from("");
+    let input = read_to_string(INPUT_FILE)
+        .unwrap_or_else(|e| panic!("Failed to read {}: {}", INPUT_FILE, e));
 
     let start = Instant::now();
     match parts {
@@ -25,15 +27,31 @@ pub fn run(parts: Parts) {
     log::debug!("Duration {}", format_duration(duration));
 }
 
-fn part_1(input: &String) -> String {
+fn part_1(input: &str) -> &str {
     log::debug!("{}", input);
-    return "".to_owned();
+    ""
 }
 
-fn part_2(input: &String) -> String {
+fn part_2(input: &str) -> &str {
     log::debug!("{}", input);
-    return "".to_owned();
+    ""
 }
 
 #[cfg(test)]
-mod test {}
+mod test {
+    use super::*;
+
+    const TEST_INPUT: &str = "";
+
+    #[test]
+    fn test_part_1() {
+        let result = part_1(&TEST_INPUT);
+        assert_eq!(result, "");
+    }
+
+    #[test]
+    fn test_part_2() {
+        let result = part_2(&TEST_INPUT);
+        assert_eq!(result, "");
+    }
+}
