@@ -35,45 +35,29 @@ fn part_1(input: &str) -> Result<i32, anyhow::Error> {
 
     let max_idx = 99;
     let min_idx = 0;
+    let n_indices = 100; // Because we include the 0 as an option
 
     let mut idx = 50;
     let mut n_zeros = 0;
     for turn in turns {
-        log::debug!("idx before: {}", idx);
-        log::debug!("turn: {:?}", turn);
-        match turn.dir {
-            Dir::L => {
-                idx = if idx < turn.count {
-                    log::debug!("Turning left and rolling over");
-                    max_idx - turn.count - idx
-                } else {
-                    log::debug!("Turning left");
-                    idx - turn.count
-                }
-            }
-            Dir::R => {
-                idx = if (max_idx - idx) < turn.count {
-                    log::debug!("Turning right and rolling over");
-                    max_idx + turn.count - idx - 1
-                } else {
-                    log::debug!("Turning right");
-                    idx + turn.count
-                }
-            }
+        // Apply, then normalize
+        idx = match turn.dir {
+            Dir::L => idx - turn.count,
+            Dir::R => idx + turn.count,
+        };
+
+        // Handle negative rollover.
+        while idx < min_idx {
+            idx = idx + n_indices;
+        }
+
+        // Handle positive rollover
+        while idx > max_idx {
+            idx = idx - n_indices;
         }
 
         if idx == 0 {
             n_zeros += 1;
-        }
-
-        log::debug!("idx: {}", idx);
-        log::debug!("n_zeros: {}\n", n_zeros);
-
-        if idx < min_idx {
-            panic!("Left rollover failed");
-        }
-        if idx > max_idx {
-            panic!("Right rollover failed");
         }
     }
 
