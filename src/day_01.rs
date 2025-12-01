@@ -64,9 +64,45 @@ fn part_1(input: &str) -> Result<i32, anyhow::Error> {
     Ok(n_zeros)
 }
 
-fn part_2(input: &str) -> &str {
+fn part_2(input: &str) -> i32 {
     log::debug!("{}", input);
-    ""
+
+    let turns = parse_input(input).unwrap();
+
+    let max_idx = 99;
+    let min_idx = 0;
+    let n_indices = 100; // Because we include the 0 as an option
+
+    let mut idx = 50;
+    let mut n_zeros = 0;
+    for turn in turns {
+        dbg!(idx);
+        dbg!(&turn);
+        // Apply, then normalize
+        idx = match turn.dir {
+            Dir::L => idx - turn.count,
+            Dir::R => idx + turn.count,
+        };
+
+        // Handle negative rollover.
+        while idx < min_idx {
+            dbg!("Handling negative rollover");
+            n_zeros += 1;
+            idx = idx + n_indices;
+        }
+
+        // Handle positive rollover
+        while idx > max_idx {
+            dbg!("Handling positive rollover");
+            n_zeros += 1;
+            idx = idx - n_indices;
+        }
+
+        dbg!(idx);
+        dbg!(n_zeros);
+    }
+
+    n_zeros
 }
 
 #[derive(Debug)]
@@ -122,6 +158,6 @@ L82";
     #[test]
     fn test_part_2() {
         let result = part_2(&TEST_INPUT);
-        assert_eq!(result, "");
+        assert_eq!(result, 6);
     }
 }
