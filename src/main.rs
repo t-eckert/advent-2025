@@ -97,7 +97,8 @@ fn pull(day: u8) -> Result<(), anyhow::Error> {
 fn run(day: u8, parts: Parts) -> Result<(), anyhow::Error> {
     match day {
         1 => day_01::run(parts),
-        2..13 => return Err(anyhow!("I haven't implemented these yet.")),
+        2 => day_02::run(parts),
+        3..13 => return Err(anyhow!("I haven't implemented these yet.")),
         _ => return Err(anyhow!("Invalid day. Valid days are 1-12 inclusive.")),
     };
 
