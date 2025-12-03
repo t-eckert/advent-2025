@@ -1,6 +1,5 @@
 use crate::{puzzle::Parts, timer::format_duration};
 use anyhow::anyhow;
-use std::collections::HashSet;
 use std::{fs::read_to_string, time::Instant};
 
 const NAME: &str = "Day 2";
@@ -54,7 +53,7 @@ fn parse_line(line: &str) -> Result<Range, anyhow::Error> {
     })
 }
 
-fn part_1(ranges: &Vec<Range>) -> u64 {
+fn part_1(ranges: &[Range]) -> u64 {
     ranges
         .iter()
         .flat_map(|range| range.from..=range.to)
@@ -62,7 +61,7 @@ fn part_1(ranges: &Vec<Range>) -> u64 {
         .sum()
 }
 
-fn part_2(ranges: &Vec<Range>) -> u64 {
+fn part_2(ranges: &[Range]) -> u64 {
     ranges
         .iter()
         .flat_map(|range| range.from..=range.to)
@@ -89,19 +88,20 @@ fn is_invalid_part_1(id: u64) -> bool {
 
 // In part two, an ID is invalid if it is composed exclusively of any repeated digit sequences.
 fn is_invalid_part_2(id: u64) -> bool {
-    // If every digit is the same, the ID is invalid.
-    if id.to_string().chars().collect::<HashSet<char>>().len() == 1 {
-        return true;
-    }
+    let id_string = id.to_string();
+    let len = id_string.len();
+    let bytes = id_string.as_bytes();
 
-    let id_str = id.to_string();
-    for seq_len in 2..=id_str.len() / 2 {
-        let unique_sequences = id_str
-            .as_bytes()
-            .chunks(seq_len)
-            .collect::<HashSet<&[u8]>>();
-
-        if unique_sequences.len() == 1 {
+    // We check the set of sequence lengths using:
+    //   (1..=len / 2).filter(|&seq_len| len.is_multiple_of(seq_len))
+    // Which includes all sequence lengths 1 to half the length of the ID (inclusive),
+    // filtering out all sequence lengths that are not a factor of the length of the ID.
+    // In other words, the sequence must fit into the ID a "whole" number of times.
+    for seq_len in (1..=len / 2).filter(|&seq_len| len.is_multiple_of(seq_len)) {
+        // The first chunk...
+        let first = &bytes[0..seq_len];
+        // ...must be equal to all of the other chunks.
+        if bytes.chunks(seq_len).all(|seq| seq == first) {
             return true;
         }
     }
@@ -117,26 +117,37 @@ mod test {
 
     #[test]
     fn test_part_1() {
-        let ranges = parse_input(&TEST_INPUT).unwrap();
+        let ranges = parse_input(TEST_INPUT).unwrap();
         let result = part_1(&ranges);
         assert_eq!(result, 1227775554);
     }
 
     #[test]
     fn test_part_2() {
-        let ranges = parse_input(&TEST_INPUT).unwrap();
+        let ranges = parse_input(TEST_INPUT).unwrap();
         let result = part_2(&ranges);
         assert_eq!(result, 4174379265);
     }
 
     #[test]
     fn test_has_even_digits() {
+        // Even digits
         assert!(has_even_n_digits(20));
         assert!(has_even_n_digits(4242));
 
+        // Odd digits
         assert!(!has_even_n_digits(0));
         assert!(!has_even_n_digits(5));
         assert!(!has_even_n_digits(100));
         assert!(!has_even_n_digits(3429504));
+    }
+
+    #[test]
+    fn test_is_invalid_part_2() {
+        // Should be valid
+        assert!(!is_invalid_part_2(1234123));
+
+        // Should be invalid
+        assert!(is_invalid_part_2(424242));
     }
 }
