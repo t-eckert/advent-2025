@@ -2,7 +2,7 @@
 
 This is my repository for [Advent of Code](https://adventofcode.com/) for 2025. These are my solutions to the puzzles.
 
-I am working in Rust using only the standard library. I'm not worried about submitting quickly, just enjoying the process of puzzle solving with my merely mortal mind. 
+I am working in Rust. I'm not worried about submitting quickly, just enjoying the process of puzzle solving with my merely mortal mind. 
 
 As a rule I will not be using any large language models or relevant AI such as Claude Code or GitHub Copilot both for writing code and for doing research. They're great, but they obviate the fundamental intention of this project. I'd rather have my own dumb solution than a smart one thought up for me. (Keep this in mind please if any of my code sucks)
 
@@ -30,7 +30,7 @@ aoc run 1 // runs the puzzle for day 1
 - [Day 2](./src/day_02.rs) ✅✅
 - [Day 3](./src/day_03.rs) ✅✅
 - [Day 4](./src/day_04.rs) ✅✅
-- [Day 5](./src/day_05.rs) ⬜⬜
+- [Day 5](./src/day_05.rs) ✅✅
 - [Day 6](./src/day_06.rs) ⬜⬜
 - [Day 7](./src/day_07.rs) ⬜⬜
 - [Day 8](./src/day_08.rs) ⬜⬜
