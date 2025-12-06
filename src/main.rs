@@ -106,5 +106,5 @@ fn run(day: u8, parts: Parts) -> Result<(), anyhow::Error> {
         _ => return Err(anyhow!("Invalid day. Valid days are 1-12 inclusive.")),
     };
 
-    return Ok(());
+    Ok(())
 }

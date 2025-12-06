@@ -122,14 +122,14 @@ L82";
 
     #[test]
     fn test_part_1() {
-        let turns = parse_input(&TEST_INPUT).unwrap();
+        let turns = parse_input(TEST_INPUT).unwrap();
         let result = part_1(&turns);
         assert_eq!(result, 3);
     }
 
     #[test]
     fn test_part_2() {
-        let turns = parse_input(&TEST_INPUT).unwrap();
+        let turns = parse_input(TEST_INPUT).unwrap();
         let result = part_2(&turns);
         assert_eq!(result, 6);
     }

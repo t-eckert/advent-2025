@@ -1,5 +1,5 @@
 use crate::{puzzle::Parts, timer::format_duration};
-use std::{char, fs::read_to_string, time::Instant};
+use std::{fs::read_to_string, time::Instant};
 
 const NAME: &str = "Day 6";
 const INPUT_FILE: &str = "inputs/day_06.txt";
@@ -42,6 +42,15 @@ struct Problem {
     op: Op,
 }
 
+impl Problem {
+    fn calculate(&self) -> u64 {
+        match self.op {
+            Op::Product => self.nums.iter().product(),
+            Op::Sum => self.nums.iter().sum(),
+        }
+    }
+}
+
 fn parse_input(input: &str) -> Result<(Vec<Problem>, Vec<Problem>), anyhow::Error> {
     Ok((parse_1(input)?, parse_2(input)?))
 }
@@ -50,33 +59,37 @@ fn parse_input(input: &str) -> Result<(Vec<Problem>, Vec<Problem>), anyhow::Erro
 fn parse_1(input: &str) -> Result<Vec<Problem>, anyhow::Error> {
     let lines: Vec<&str> = input.lines().collect();
 
-    let mut num_lines: Vec<Vec<u64>> = vec![];
-    for line in &lines[..lines.len() - 1] {
-        num_lines.push(
+    // All lines except the last are number lines
+    let num_lines: Vec<Vec<u64>> = lines[..lines.len() - 1]
+        .iter()
+        .map(|line| {
             line.split_whitespace()
-                .filter_map(|d| d.parse().ok())
-                .collect(),
-        );
-    }
-
-    let ops_line: Vec<Op> = lines
-        .last()
-        .unwrap()
-        .split_whitespace()
-        .filter_map(|s| match s {
-            "*" => Some(Op::Product),
-            "+" => Some(Op::Sum),
-            _ => None,
+                .filter_map(|s| s.parse().ok())
+                .collect()
         })
         .collect();
 
-    let mut problems: Vec<Problem> = vec![];
-    for i in 0..ops_line.len() {
-        problems.push(Problem {
+    // Parse the operations from the last line
+    let ops_line: Vec<Op> = lines
+        .last()
+        .map(|line| {
+            line.split_whitespace()
+                .filter_map(|s| match s {
+                    "*" => Some(Op::Product),
+                    "+" => Some(Op::Sum),
+                    _ => None,
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    // Build problems by iterating over columns
+    let problems = (0..ops_line.len())
+        .map(|i| Problem {
             nums: num_lines.iter().map(|num_line| num_line[i]).collect(),
             op: ops_line[i],
         })
-    }
+        .collect();
 
     Ok(problems)
 }
@@ -84,37 +97,43 @@ fn parse_1(input: &str) -> Result<Vec<Problem>, anyhow::Error> {
 fn parse_2(input: &str) -> Result<Vec<Problem>, anyhow::Error> {
     let lines: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
 
-    let mut problems: Vec<Problem> = vec![];
+    let mut problems = Vec::new();
+    let mut nums = Vec::new();
 
-    let mut nums: Vec<u64> = vec![];
-    let mut some_op: Option<Op> = None;
     for idx in (0..lines[0].len()).rev() {
-        let col: Vec<&char> = lines.iter().filter_map(|line| line.get(idx)).collect();
+        // Collect column characters by value to avoid double references
+        let col: Vec<char> = lines
+            .iter()
+            .filter_map(|line| line.get(idx).copied())
+            .collect();
 
-        if col.iter().all(|c| c == &&' ') {
+        // Skip columns that are all spaces
+        if col.iter().all(|&c| c == ' ') {
             continue;
         }
 
-        nums.push(
-            col.iter()
-                .rev()
-                .filter_map(|c| c.to_digit(10))
-                .enumerate()
-                .fold(0, |acc, (place, d)| {
-                    acc + d as u64 * 10_u64.pow(place as u32)
-                }),
-        );
+        // Parse number from column (reading bottom to top)
+        let num = col
+            .iter()
+            .rev()
+            .filter_map(|&c| c.to_digit(10))
+            .enumerate()
+            .fold(0, |acc, (place, d)| {
+                acc + d as u64 * 10_u64.pow(place as u32)
+            });
 
-        some_op = match col.last() {
-            Some('*') => Some(Op::Product),
-            Some('+') => Some(Op::Sum),
+        nums.push(num);
+
+        // Check for operator in last position and create problem if found
+        if let Some(op) = match col.last() {
+            Some(&'*') => Some(Op::Product),
+            Some(&'+') => Some(Op::Sum),
             _ => None,
-        };
-
-        if let Some(op) = some_op {
-            problems.push(Problem { nums, op });
-            nums = vec![];
-            some_op = None;
+        } {
+            problems.push(Problem {
+                nums: std::mem::take(&mut nums),
+                op,
+            });
         }
     }
 
@@ -122,23 +141,15 @@ fn parse_2(input: &str) -> Result<Vec<Problem>, anyhow::Error> {
 }
 
 fn part_1(problems: &[Problem]) -> u64 {
-    problems
-        .iter()
-        .map(|problem| match problem.op {
-            Op::Product => problem.nums.iter().product::<u64>(),
-            Op::Sum => problem.nums.iter().sum(),
-        })
-        .sum()
+    solve(problems)
 }
 
 fn part_2(problems: &[Problem]) -> u64 {
-    problems
-        .iter()
-        .map(|problem| match problem.op {
-            Op::Product => problem.nums.iter().product::<u64>(),
-            Op::Sum => problem.nums.iter().sum(),
-        })
-        .sum()
+    solve(problems)
+}
+
+fn solve(problems: &[Problem]) -> u64 {
+    problems.iter().map(Problem::calculate).sum()
 }
 
 #[cfg(test)]
@@ -164,6 +175,3 @@ mod test {
         assert_eq!(result, 3263827);
     }
 }
-
-// 4864399704090 too low    I was trimming whitespace!!!
-// 10189959087258
